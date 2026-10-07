@@ -1,84 +1,114 @@
-import streamlit as st
-import requests
 import numpy as np
-from scipy.stats import poisson
+import pandas as pd
+import scipy.stats as stats
+import streamlit as st
 
-st.set_page_config(page_title="المحلل الرياضي الذكي", page_icon="⚽", layout="wide")
+st.set_page_config(
+    page_title="المحلل الرياضي المتقدم", page_icon="⚽", layout="centered"
+)
 
-st.title("⚽ المحلل الرياضي التفاعلي لحساب الاحتمالات")
-st.write("برنامج تحليلي يعتمد على توزيع بواسون الإحصائي لتوقع كافة خيارات المباريات.")
+st.title("⚽ المحلل الرياضي التفاعلي المتقدم")
+st.markdown(
+    "برنامج تحليلي متطور يعتمد على توزيع بواسون الإحصائي لتوقع كافة خيارات"
+    " المباريات (النتيجة، الأهداف، والركنيات)."
+)
 
-# الرمز الخاص بك جاهز ومدمج تلقائياً
-API_KEY = "yldcCxtiEP"
+st.sidebar.header("إعدادات البيانات")
+input_mode = st.sidebar.radio(
+    "طريقة إدخال البيانات:", ("إدخال يدوي (xG)", "جلب تلقائي (عبر API قريباً)")
+)
 
-@st.cache_data(ttl=3600)
-def fetch_upcoming_matches():
-    url = f"https://admin.soccersapi.com/v2.2/leagues/?action=list&secret={API_KEY}"
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json()
-    except Exception as e:
-        st.error(f"خطأ أثناء جلب البيانات: {e}")
-    return {}
+st.divider()
 
-def calculate_predictions(home_xg, away_xg):
-    goals = range(6)
-    home_probs = [poisson.pmf(g, home_xg) for g in goals]
-    away_probs = [poisson.pmf(g, away_xg) for g in goals]
-    
-    score_matrix = np.outer(home_probs, away_probs)
-    
-    home_win = np.sum(np.tril(score_matrix, -1)) * 100
-    draw = np.sum(np.diag(score_matrix)) * 100
-    away_win = np.sum(np.triu(score_matrix, 1)) * 100
-    
-    over_25 = np.sum([score_matrix[h, a] for h in goals for a in goals if h + a > 2.5]) * 100
-    under_25 = 100 - over_25
-    
-    btts_yes = np.sum(score_matrix[1:, 1:]) * 100
-    btts_no = 100 - btts_yes
-    
-    exact_scores = []
-    for h in goals:
-        for a in goals:
-            exact_scores.append((f"{h} - {a}", score_matrix[h, a] * 100))
-    exact_scores.sort(key=lambda x: x[1], reverse=True)
-    
-    return {
-        "home_win": home_win, "draw": draw, "away_win": away_win,
-        "over_25": over_25, "under_25": under_25,
-        "btts_yes": btts_yes, "btts_no": btts_no,
-        "top_scores": exact_scores[:5]
-    }
+st.subheader("📊 إدخال أرقام المباراة والأهداف المتوقعة")
+col1, col2 = st.columns(2)
 
-st.subheader("📊 إدخال أرقام المباراة لحساب التوقع")
-col_input1, col_input2 = st.columns(2)
-with col_input1:
-    home_xg = st.number_input("الأهداف المتوقعة للفريق المضيف (Home xG):", min_value=0.1, max_value=5.0, value=1.75, step=0.05)
-with col_input2:
-    away_xg = st.number_input("الأهداف المتوقعة للفريق الضيف (Away xG):", min_value=0.1, max_value=5.0, value=1.10, step=0.05)
+with col1:
+  home_xg = st.number_input(
+      "الأهداف المتوقعة للمضيف (Home xG)",
+      min_value=0.1,
+      max_value=5.0,
+      value=1.75,
+      step=0.05,
+  )
 
-res = calculate_predictions(home_xg, away_xg)
+with col2:
+  away_xg = st.number_input(
+      "الأهداف المتوقعة للضيف (Away xG)",
+      min_value=0.1,
+      max_value=5.0,
+      value=1.10,
+      step=0.05,
+  )
+
+st.subheader("🚩 الركنيات المتوقعة للمباراة")
+col_c1, col_c2 = st.columns(2)
+with col_c1:
+  home_corners = st.number_input(
+      "ركنيات المضيف", min_value=0.5, max_value=15.0, value=5.5, step=0.5
+  )
+with col_c2:
+  away_corners = st.number_input(
+      "ركنيات الضيف", min_value=0.5, max_value=15.0, value=4.5, step=0.5
+  )
+
+# حساب احتمالات الأهداف والنتيجة عبر توزيع بواسون
+max_goals = 7
+home_probs = [stats.poisson.pmf(i, home_xg) for i in range(max_goals)]
+away_probs = [stats.poisson.pmf(j, away_xg) for j in range(max_goals)]
+
+# مصفوفة احتمالات النتائج
+matrix = np.outer(home_probs, away_probs)
+
+home_win = np.sum(np.tril(matrix, -1))
+draw = np.sum(np.diag(matrix))
+away_win = np.sum(np.triu(matrix, 1))
+
+# حساب Over / Under 2.5
+under_2_5 = 0
+over_2_5 = 0
+for i in range(max_goals):
+  for j in range(max_goals):
+    if i + j <= 2:
+      under_2_5 += matrix[i, j]
+    else:
+      over_2_5 += matrix[i, j]
+
+# حساب GG / NG (تسجيل الفريقين)
+btts_yes = 0
+for i in range(1, max_goals):
+  for j in range(1, max_goals):
+    btts_yes += matrix[i, j]
+btts_no = 1.0 - btts_yes
+
+st.divider()
+st.subheader("📈 نتائج وتحليلات الاحتمالات الشاملة")
+
+# نتائج النتيجة الرئيسية (1X2)
+res_col1, res_col2, res_col3 = st.columns(3)
+res_col1.metric("فوز المضيف", f"{home_win * 100:.1f}%")
+res_col2.metric("تعادل", f"{draw * 100:.1f}%")
+res_col3.metric("فوز الضيف", f"{away_win * 100:.1f}%")
 
 st.markdown("---")
-c1, c2, c3 = st.columns(3)
-c1.metric("فوز المضيف", f"{res['home_win']:.1f}%")
-c2.metric("التعادل", f"{res['draw']:.1f}%")
-c3.metric("فوز الضيف", f"{res['away_win']:.1f}%")
+
+# أسواق الأهداف و GG/NG
+market_col1, market_col2 = st.columns(2)
+
+with market_col1:
+  st.markdown("### 🥅 أهداف المباراة (Over / Under 2.5)")
+  st.write(f"أكثر من 2.5 هدف (Over): **{over_2_5 * 100:.1f}%**")
+  st.write(f"أقل من 2.5 هدف (Under): **{under_2_5 * 100:.1f}%**")
+
+with market_col2:
+  st.markdown("### ⚽ تسجيل الفريقين (GG / NG)")
+  st.write(f"كلا الفريقين يسجلان (GG): **{btts_yes * 100:.1f}%**")
+  st.write(f"لا يسجل الفريقان أو أحدهما (NG): **{btts_no * 100:.1f}%**")
 
 st.markdown("---")
-col_a, col_b = st.columns(2)
-with col_a:
-    st.write("### ⚽ سوق الأهداف (Total Goals)")
-    st.write(f"• **أكثر من 2.5 هدف (Over 2.5):** {res['over_25']:.1f}%")
-    st.write(f"• **أقل من 2.5 هدف (Under 2.5):** {res['under_25']:.1f}%")
-    
-    st.write("### 🥅 كلا الفريقين يسجلان (BTTS)")
-    st.write(f"• **نعم (Yes):** {res['btts_yes']:.1f}%")
-    st.write(f"• **لا (No):** {res['btts_no']:.1f}%")
-
-with col_b:
-    st.write("### 🎯 أكثر 5 نتائج دقيقة احتمالية (Correct Score)")
-    for score, prob in res['top_scores']:
-        st.write(f"• النتيجة **({score})**: بنسبة **{prob:.1f}%**")
+st.subheader("🚩 تحليل الركنيات (Corners)")
+total_corners = home_corners + away_corners
+st.info(
+    f"المعدل الإجمالي المتوقع للركنيات: **{total_corners:.1f}** ركنية في اللقاء"
+    f" (المضيف: {home_corners} | الضيف: {away_corners})"
+)
