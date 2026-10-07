@@ -40,6 +40,22 @@ leagues = {
             "h_c": 6.0,
             "a_c": 4.5,
         },
+        "Barcelone vs Inter Milan": {
+            "home": "Barcelone",
+            "away": "Inter Milan",
+            "h_xg": 1.70,
+            "a_xg": 1.40,
+            "h_c": 5.5,
+            "a_c": 4.0,
+        },
+        "Arsenal vs Real Madrid": {
+            "home": "Arsenal",
+            "away": "Real Madrid",
+            "h_xg": 1.65,
+            "a_xg": 1.70,
+            "h_c": 5.8,
+            "a_c": 5.2,
+        },
     },
     "🇬🇧 Premier League": {
         "Arsenal vs Liverpool": {
@@ -58,6 +74,30 @@ leagues = {
             "h_c": 6.5,
             "a_c": 4.0,
         },
+        "Manchester United vs Tottenham": {
+            "home": "Manchester United",
+            "away": "Tottenham",
+            "h_xg": 1.60,
+            "a_xg": 1.55,
+            "h_c": 5.5,
+            "a_c": 5.0,
+        },
+        "Aston Villa vs Newcastle United": {
+            "home": "Aston Villa",
+            "away": "Newcastle United",
+            "h_xg": 1.55,
+            "a_xg": 1.45,
+            "h_c": 5.0,
+            "a_c": 4.8,
+        },
+        "Brighton vs West Ham": {
+            "home": "Brighton",
+            "away": "West Ham",
+            "h_xg": 1.65,
+            "a_xg": 1.35,
+            "h_c": 6.0,
+            "a_c": 4.2,
+        },
     },
     "🇪🇸 La Liga": {
         "Real Madrid vs Barcelone": {
@@ -67,101 +107,82 @@ leagues = {
             "a_xg": 1.8,
             "h_c": 6.0,
             "a_c": 5.0,
-        }
+        },
+        "Atletico Madrid vs Real Sociedad": {
+            "home": "Atletico Madrid",
+            "away": "Real Sociedad",
+            "h_xg": 1.65,
+            "a_xg": 1.10,
+            "h_c": 5.0,
+            "a_c": 4.0,
+        },
+        "Athletic Bilbao vs Villarreal": {
+            "home": "Athletic Bilbao",
+            "away": "Villarreal",
+            "h_xg": 1.60,
+            "a_xg": 1.30,
+            "h_c": 5.5,
+            "a_c": 4.5,
+        },
+        "Real Betis vs Valencia": {
+            "home": "Real Betis",
+            "away": "Valencia",
+            "h_xg": 1.50,
+            "a_xg": 1.20,
+            "h_c": 4.8,
+            "a_c": 4.2,
+        },
     },
-}
-
-st.sidebar.header("🌍 Navigation")
-sel_league = st.sidebar.selectbox("Championnat:", list(leagues.keys()))
-match_dict = leagues[sel_league]
-sel_match = st.sidebar.selectbox("Match:", list(match_dict.keys()))
-
-info = match_dict[sel_match]
-
-if "cur" not in st.session_state or st.session_state.cur != sel_match:
-  st.session_state.cur = sel_match
-  st.session_state.h_team = info["home"]
-  st.session_state.a_team = info["away"]
-  st.session_state.h_xg = info["h_xg"]
-  st.session_state.a_xg = info["a_xg"]
-  st.session_state.h_c = info["h_c"]
-  st.session_state.a_c = info["a_c"]
-
-st.divider()
-
-col1, col2 = st.columns(2)
-with col1:
-  home_team = st.text_input("Équipe Domicile", key="h_team")
-  home_xg = st.number_input(
-      "xG Domicile", 0.1, 6.0, 0.05, key="h_xg", format="%.2f"
-  )
-with col2:
-  away_team = st.text_input("Équipe Extérieur", key="a_team")
-  away_xg = st.number_input(
-      "xG Extérieur", 0.1, 6.0, 0.05, key="a_xg", format="%.2f"
-  )
-
-st.subheader("🚩 Corners")
-col_c1, col_c2 = st.columns(2)
-with col_c1:
-  home_corners = st.number_input("Corners Domicile", 0.5, 15.0, 0.5, key="h_c")
-with col_c2:
-  away_corners = st.number_input("Corners Extérieur", 0.5, 15.0, 0.5, key="a_c")
-
-max_g = 6
-h_probs = [stats.poisson.pmf(i, home_xg) for i in range(max_g)]
-a_probs = [stats.poisson.pmf(j, away_xg) for j in range(max_g)]
-mat = np.outer(h_probs, a_probs)
-
-hw = float(np.sum(np.tril(mat, -1)))
-dr = float(np.sum(np.diag(mat)))
-aw = float(np.sum(np.triu(mat, 1)))
-
-u25 = float(sum(mat[i, j] for i in range(max_g) for j in range(max_g) if i + j <= 2))
-o25 = 1.0 - u25
-
-btts_y = float(
-    sum(mat[i, j] for i in range(1, max_g) for j in range(1, max_g))
-)
-btts_n = 1.0 - btts_y
-
-cs_h = float(a_probs[0])
-cs_a = float(h_probs[0])
-
-st.divider()
-st.subheader(f"📈 Analyse : {home_team} vs {away_team}")
-
-r1, r2, r3 = st.columns(3)
-r1.metric(f"Victoire {home_team}", f"{hw * 100:.1f}%")
-r2.metric("Nul", f"{dr * 100:.1f}%")
-r3.metric(f"Victoire {away_team}", f"{aw * 100:.1f}%")
-
-st.markdown("---")
-m1, m2 = st.columns(2)
-with m1:
-  st.markdown("### 🥅 Buts")
-  st.write(f"Over 2.5 : **{o25 * 100:.1f}%**")
-  st.write(f"Under 2.5 : **{u25 * 100:.1f}%**")
-  st.write(f"BTTS (Oui) : **{btts_y * 100:.1f}%**")
-  st.write(f"BTTS (Non) : **{btts_n * 100:.1f}%**")
-
-with m2:
-  st.markdown("### 🛡️ Clean Sheets & Corners")
-  st.write(f"Clean Sheet {home_team} : **{cs_h * 100:.1f}%**")
-  st.write(f"Clean Sheet {away_team} : **{cs_a * 100:.1f}%**")
-  st.write(f"Total Corners : **{home_corners + away_corners:.1f}**")
-
-st.markdown("---")
-st.subheader("🎯 Scores Exacts")
-scores = []
-for h in range(4):
-  for a in range(4):
-    scores.append(
-        {
-            "Score": f"{h} - {a}",
-            "Probabilité (%)": round(mat[h, a] * 100, 2),
-        }
-    )
-
-df = pd.DataFrame(scores).sort_values(by="Probabilité (%)", ascending=False)
-st.dataframe(df.head(6), use_container_width=True)
+    "🇮🇹 Serie A": {
+        "Juventus vs AC Milan": {
+            "home": "Juventus",
+            "away": "AC Milan",
+            "h_xg": 1.45,
+            "a_xg": 1.35,
+            "h_c": 4.5,
+            "a_c": 4.5,
+        },
+        "Napoli vs AS Roma": {
+            "home": "Napoli",
+            "away": "AS Roma",
+            "h_xg": 1.75,
+            "a_xg": 1.20,
+            "h_c": 5.5,
+            "a_c": 4.0,
+        },
+        "Inter Milan vs Lazio": {
+            "home": "Inter Milan",
+            "away": "Lazio",
+            "h_xg": 1.90,
+            "a_xg": 1.30,
+            "h_c": 6.0,
+            "a_c": 4.2,
+        },
+        "Atalanta vs Fiorentina": {
+            "home": "Atalanta",
+            "away": "Fiorentina",
+            "h_xg": 1.80,
+            "a_xg": 1.40,
+            "h_c": 5.8,
+            "a_c": 4.6,
+        },
+    },
+    "🇩🇪 Bundesliga": {
+        "Borussia Dortmund vs RB Leipzig": {
+            "home": "Borussia Dortmund",
+            "away": "RB Leipzig",
+            "h_xg": 1.80,
+            "a_xg": 1.50,
+            "h_c": 6.0,
+            "a_c": 5.0,
+        },
+        "Bayern Munich vs Bayer Leverkusen": {
+            "home": "Bayern Munich",
+            "away": "Bayer Leverkusen",
+            "h_xg": 2.10,
+            "a_xg": 1.80,
+            "h_c": 6.5,
+            "a_c": 5.5,
+        },
+        "VfB Stuttgart vs Eintracht Frankfurt": {
+  
