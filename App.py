@@ -13,7 +13,7 @@ st.markdown(
     " approfondies (xG, Corners, Scores Exacts et Clean Sheets)."
 )
 
-# قائمة واسعة وشاملة لأبرز الدوريات العالمية مع إمكانية التعديل الكامل
+# قائمة الدوريات الشاملة مع إمكانية الإدخال الحر
 leagues = {
     "🏆 Match Personnalisé / En Direct (Saisie Libre)": {
         "Saisir les équipes et xG du match du jour": {
@@ -164,19 +164,3 @@ with col2:
   away_team = st.text_input("Équipe à l'Extérieur", key="away_team")
   away_xg = st.number_input(
       "xG Extérieur (Buts attendus)",
-      min_value=0.1,
-      max_value=6.0,
-      step=0.05,
-      key="away_xg",
-  )
-
-st.subheader("🚩 Analyse des Corners")
-col_c1, col_c2 = st.columns(2)
-with col_c1:
-  home_corners = st.number_input(
-      "Corners Domicile",
-      min_value=0.5,
-      max_value=15.0,
-      step=0.5,
-      key="home_corners",
- 
