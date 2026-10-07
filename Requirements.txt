@@ -1,4 +1,4 @@
-streaming
+streamlit
 requests
 numpy
 scipy
