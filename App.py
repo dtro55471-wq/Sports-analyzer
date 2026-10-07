@@ -4,40 +4,90 @@ import scipy.stats as stats
 import streamlit as st
 
 st.set_page_config(
-    page_title="المحلل الرياضي المتقدم", page_icon="⚽", layout="centered"
+    page_title="المحلل الرياضي الذكي للمباريات", page_icon="⚽", layout="centered"
 )
 
-st.title("⚽ المحلل الرياضي التفاعلي المتقدم")
+st.title("⚽ المحلل الرياضي التفاعلي للمباريات")
 st.markdown(
-    "برنامج تحليلي متطور يعتمد على توزيع بواسون الإحصائي لتوقع كافة خيارات"
-    " المباريات (النتيجة، الأهداف، والركنيات)."
+    "اختر مباراة مباشرة من القائمة الجانبية أو أدخل أرقامها لتحليل كافة"
+    " الاحتمالات بشكل فوري."
 )
 
-st.sidebar.header("إعدادات البيانات")
-input_mode = st.sidebar.radio(
-    "طريقة إدخال البيانات:", ("إدخال يدوي (xG)", "جلب تلقائي (عبر API قريباً)")
+# قائمة المباريات النموذجية التي يتم تحديثها
+matches_data = {
+    "اختر مباراة مخصصة (إدخال يدوي)": {
+        "home": "المضيف",
+        "away": "الضيف",
+        "h_xg": 1.75,
+        "a_xg": 1.10,
+        "h_c": 5.5,
+        "a_c": 4.5,
+    },
+    "ريال مدريد ضد برشلونة": {
+        "home": "ريال مدريد",
+        "away": "برشلونة",
+        "h_xg": 1.90,
+        "a_xg": 1.65,
+        "h_c": 6.0,
+        "a_c": 5.0,
+    },
+    "مانشستر سيتي ضد أرسنال": {
+        "home": "مانشستر سيتي",
+        "away": "أرسنال",
+        "h_xg": 2.10,
+        "a_xg": 1.50,
+        "h_c": 6.5,
+        "a_c": 4.0,
+    },
+    "بايرن ميونخ ضد بوروسيا دورتموند": {
+        "home": "بايرن ميونخ",
+        "away": "بوروسيا دورتموند",
+        "h_xg": 2.20,
+        "a_xg": 1.40,
+        "h_c": 7.0,
+        "a_c": 4.5,
+    },
+    "باريس سان جيرمان ضد مارسيليا": {
+        "home": "باريس سان جيرمان",
+        "away": "مارسيليا",
+        "h_xg": 1.85,
+        "a_xg": 1.15,
+        "h_c": 5.5,
+        "a_c": 3.5,
+    },
+}
+
+st.sidebar.header("🗓️ قائمة المباريات المتاحة")
+selected_match = st.sidebar.selectbox(
+    "اختر المباراة للتحليل:", list(matches_data.keys())
 )
+
+match_info = matches_data[selected_match]
 
 st.divider()
 
-st.subheader("📊 إدخال أرقام المباراة والأهداف المتوقعة")
+st.subheader("📊 بيانات الفريقين والأهداف المتوقعة (xG)")
 col1, col2 = st.columns(2)
 
 with col1:
+  home_team = st.text_input("اسم الفريق المضيف", value=match_info["home"])
   home_xg = st.number_input(
-      "الأهداف المتوقعة للمضيف (Home xG)",
+      f"الأهداف المتوقعة لـ {home_team} (Home xG)",
       min_value=0.1,
       max_value=5.0,
-      value=1.75,
+      value=match_info["h_xg"],
       step=0.05,
   )
 
 with col2:
+  away_team = st.text_input("اسم الفريق الضيف", value=match_info["away"])
   away_xg = st.number_input(
-      "الأهداف المتوقعة للضيف (Away xG)",
+      f"الأهداف المتوقعة لـ {home_team} (Away xG)"
+      if False
+      else f"الأهداف المتوقعة لـ {away_team} (Away xG)",
       min_value=0.1,
       max_value=5.0,
-      value=1.10,
+      value=match_info["a_xg"],
       step=0.05,
   )
 
@@ -45,11 +95,19 @@ st.subheader("🚩 الركنيات المتوقعة للمباراة")
 col_c1, col_c2 = st.columns(2)
 with col_c1:
   home_corners = st.number_input(
-      "ركنيات المضيف", min_value=0.5, max_value=15.0, value=5.5, step=0.5
+      f"ركنيات {home_team}",
+      min_value=0.5,
+      max_value=15.0,
+      value=match_info["h_c"],
+      step=0.5,
   )
 with col_c2:
   away_corners = st.number_input(
-      "ركنيات الضيف", min_value=0.5, max_value=15.0, value=4.5, step=0.5
+      f"ركنيات {away_team}",
+      min_value=0.5,
+      max_value=15.0,
+      value=match_info["a_c"],
+      step=0.5,
   )
 
 # حساب احتمالات الأهداف والنتيجة عبر توزيع بواسون
@@ -82,13 +140,13 @@ for i in range(1, max_goals):
 btts_no = 1.0 - btts_yes
 
 st.divider()
-st.subheader("📈 نتائج وتحليلات الاحتمالات الشاملة")
+st.subheader(f"📈 نتائج وتحليلات لقاء: {home_team} ضد {away_team}")
 
 # نتائج النتيجة الرئيسية (1X2)
 res_col1, res_col2, res_col3 = st.columns(3)
-res_col1.metric("فوز المضيف", f"{home_win * 100:.1f}%")
+res_col1.metric(f"فوز {home_team}", f"{home_win * 100:.1f}%")
 res_col2.metric("تعادل", f"{draw * 100:.1f}%")
-res_col3.metric("فوز الضيف", f"{away_win * 100:.1f}%")
+res_col3.metric(f"فوز {away_team}", f"{away_win * 100:.1f}%")
 
 st.markdown("---")
 
@@ -110,5 +168,5 @@ st.subheader("🚩 تحليل الركنيات (Corners)")
 total_corners = home_corners + away_corners
 st.info(
     f"المعدل الإجمالي المتوقع للركنيات: **{total_corners:.1f}** ركنية في اللقاء"
-    f" (المضيف: {home_corners} | الضيف: {away_corners})"
+    f" ({home_team}: {home_corners} | {away_team}: {away_corners})"
 )
