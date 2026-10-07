@@ -7,20 +7,18 @@ st.set_page_config(
     page_title="Analyseur Sportif Pro", page_icon="⚽", layout="centered"
 )
 
-st.title("⚽ Analyseur Sportif Professionnel & Avancé")
+st.title("⚽ Analyseur Sportif Pro & Avancé")
 st.markdown(
-    "Analysez n'importe quel match dans le monde avec des statistiques"
-    " approfondies (xG, Corners, Scores Exacts et Clean Sheets)."
+    "Sélectionnez un championnat et un match pour l'analyser instantanément."
 )
 
-# قائمة الدوريات الشاملة مع إمكانية الإدخال الحر
 leagues = {
-    "🏆 Match Personnalisé / En Direct (Saisie Libre)": {
-        "Saisir les équipes et xG du match du jour": {
-            "home": "Équipe Domicile",
-            "away": "Équipe Extérieur",
-            "h_xg": 1.60,
-            "a_xg": 1.30,
+    "🏆 Match Personnalisé (Saisie Libre)": {
+        "Saisir les équipes et xG": {
+            "home": "Domicile",
+            "away": "Extérieur",
+            "h_xg": 1.6,
+            "a_xg": 1.3,
             "h_c": 5.5,
             "a_c": 4.5,
         }
@@ -38,20 +36,12 @@ leagues = {
             "home": "Bayern Munich",
             "away": "Paris Saint-Germain",
             "h_xg": 1.95,
-            "a_xg": 1.60,
+            "a_xg": 1.6,
             "h_c": 6.0,
             "a_c": 4.5,
         },
-        "Barcelone vs Inter Milan": {
-            "home": "Barcelone",
-            "away": "Inter Milan",
-            "h_xg": 1.70,
-            "a_xg": 1.40,
-            "h_c": 5.5,
-            "a_c": 4.0,
-        },
     },
-    "🇬🇧 Premier League (Angleterre)": {
+    "🇬🇧 Premier League": {
         "Arsenal vs Liverpool": {
             "home": "Arsenal",
             "away": "Liverpool",
@@ -63,104 +53,115 @@ leagues = {
         "Manchester City vs Chelsea": {
             "home": "Manchester City",
             "away": "Chelsea",
-            "h_xg": 2.10,
-            "a_xg": 1.30,
+            "h_xg": 2.1,
+            "a_xg": 1.3,
             "h_c": 6.5,
             "a_c": 4.0,
         },
-        "Manchester United vs Tottenham": {
-            "home": "Manchester United",
-            "away": "Tottenham",
-            "h_xg": 1.60,
-            "a_xg": 1.55,
-            "h_c": 5.5,
-            "a_c": 5.0,
-        },
     },
-    "🇪🇸 La Liga (Espagne)": {
+    "🇪🇸 La Liga": {
         "Real Madrid vs Barcelone": {
             "home": "Real Madrid",
             "away": "Barcelone",
-            "h_xg": 1.90,
-            "a_xg": 1.80,
+            "h_xg": 1.9,
+            "a_xg": 1.8,
             "h_c": 6.0,
             "a_c": 5.0,
-        },
-        "Atletico Madrid vs Real Sociedad": {
-            "home": "Atletico Madrid",
-            "away": "Real Sociedad",
-            "h_xg": 1.65,
-            "a_xg": 1.10,
-            "h_c": 5.0,
-            "a_c": 4.0,
-        },
-    },
-    "🌍 Compétitions Africaines & Arabes": {
-        "Al Ahly vs Espérance de Tunis": {
-            "home": "Al Ahly",
-            "away": "Espérance de Tunis",
-            "h_xg": 1.60,
-            "a_xg": 1.15,
-            "h_c": 5.0,
-            "a_c": 4.0,
-        },
-        "Wydad AC vs Mamelodi Sundowns": {
-            "home": "Wydad AC",
-            "away": "Mamelodi Sundowns",
-            "h_xg": 1.50,
-            "a_xg": 1.30,
-            "h_c": 4.5,
-            "a_c": 4.5,
-        },
-        "Raja CA vs FAR Rabat": {
-            "home": "Raja CA",
-            "away": "FAR Rabat",
-            "h_xg": 1.55,
-            "a_xg": 1.35,
-            "h_c": 5.0,
-            "a_c": 4.5,
-        },
+        }
     },
 }
 
-st.sidebar.header("🌍 Sélection de la Compétition")
-selected_league = st.sidebar.selectbox(
-    "Choisissez le championnat :", list(leagues.keys())
-)
+st.sidebar.header("🌍 Navigation")
+sel_league = st.sidebar.selectbox("Championnat:", list(leagues.keys()))
+match_dict = leagues[sel_league]
+sel_match = st.sidebar.selectbox("Match:", list(match_dict.keys()))
 
-match_dict = leagues[selected_league]
-selected_match = st.sidebar.selectbox(
-    "Choisissez le match :", list(match_dict.keys())
-)
+info = match_dict[sel_match]
 
-match_info = match_dict[selected_match]
-
-if (
-    "current_match" not in st.session_state
-    or st.session_state.current_match != selected_match
-):
-  st.session_state.current_match = selected_match
-  st.session_state.home_team = match_info["home"]
-  st.session_state.away_team = match_info["away"]
-  st.session_state.home_xg = match_info["h_xg"]
-  st.session_state.away_xg = match_info["a_xg"]
-  st.session_state.home_corners = match_info["h_c"]
-  st.session_state.away_corners = match_info["a_c"]
+if "cur" not in st.session_state or st.session_state.cur != sel_match:
+  st.session_state.cur = sel_match
+  st.session_state.h_team = info["home"]
+  st.session_state.a_team = info["away"]
+  st.session_state.h_xg = info["h_xg"]
+  st.session_state.a_xg = info["a_xg"]
+  st.session_state.h_c = info["h_c"]
+  st.session_state.a_c = info["a_c"]
 
 st.divider()
 
-st.subheader("⚙️ Paramètres & Statistiques du Match")
 col1, col2 = st.columns(2)
 with col1:
-  home_team = st.text_input("Équipe à Domicile", key="home_team")
+  home_team = st.text_input("Équipe Domicile", key="h_team")
   home_xg = st.number_input(
-      "xG Domicile (Buts attendus)",
-      min_value=0.1,
-      max_value=6.0,
-      step=0.05,
-      key="home_xg",
+      "xG Domicile", 0.1, 6.0, 0.05, key="h_xg", format="%.2f"
   )
 with col2:
-  away_team = st.text_input("Équipe à l'Extérieur", key="away_team")
+  away_team = st.text_input("Équipe Extérieur", key="a_team")
   away_xg = st.number_input(
-      "xG Extérieur (Buts attendus)",
+      "xG Extérieur", 0.1, 6.0, 0.05, key="a_xg", format="%.2f"
+  )
+
+st.subheader("🚩 Corners")
+col_c1, col_c2 = st.columns(2)
+with col_c1:
+  home_corners = st.number_input("Corners Domicile", 0.5, 15.0, 0.5, key="h_c")
+with col_c2:
+  away_corners = st.number_input("Corners Extérieur", 0.5, 15.0, 0.5, key="a_c")
+
+max_g = 6
+h_probs = [stats.poisson.pmf(i, home_xg) for i in range(max_g)]
+a_probs = [stats.poisson.pmf(j, away_xg) for j in range(max_g)]
+mat = np.outer(h_probs, a_probs)
+
+hw = float(np.sum(np.tril(mat, -1)))
+dr = float(np.sum(np.diag(mat)))
+aw = float(np.sum(np.triu(mat, 1)))
+
+u25 = float(sum(mat[i, j] for i in range(max_g) for j in range(max_g) if i + j <= 2))
+o25 = 1.0 - u25
+
+btts_y = float(
+    sum(mat[i, j] for i in range(1, max_g) for j in range(1, max_g))
+)
+btts_n = 1.0 - btts_y
+
+cs_h = float(a_probs[0])
+cs_a = float(h_probs[0])
+
+st.divider()
+st.subheader(f"📈 Analyse : {home_team} vs {away_team}")
+
+r1, r2, r3 = st.columns(3)
+r1.metric(f"Victoire {home_team}", f"{hw * 100:.1f}%")
+r2.metric("Nul", f"{dr * 100:.1f}%")
+r3.metric(f"Victoire {away_team}", f"{aw * 100:.1f}%")
+
+st.markdown("---")
+m1, m2 = st.columns(2)
+with m1:
+  st.markdown("### 🥅 Buts")
+  st.write(f"Over 2.5 : **{o25 * 100:.1f}%**")
+  st.write(f"Under 2.5 : **{u25 * 100:.1f}%**")
+  st.write(f"BTTS (Oui) : **{btts_y * 100:.1f}%**")
+  st.write(f"BTTS (Non) : **{btts_n * 100:.1f}%**")
+
+with m2:
+  st.markdown("### 🛡️ Clean Sheets & Corners")
+  st.write(f"Clean Sheet {home_team} : **{cs_h * 100:.1f}%**")
+  st.write(f"Clean Sheet {away_team} : **{cs_a * 100:.1f}%**")
+  st.write(f"Total Corners : **{home_corners + away_corners:.1f}**")
+
+st.markdown("---")
+st.subheader("🎯 Scores Exacts")
+scores = []
+for h in range(4):
+  for a in range(4):
+    scores.append(
+        {
+            "Score": f"{h} - {a}",
+            "Probabilité (%)": round(mat[h, a] * 100, 2),
+        }
+    )
+
+df = pd.DataFrame(scores).sort_values(by="Probabilité (%)", ascending=False)
+st.dataframe(df.head(6), use_container_width=True)
