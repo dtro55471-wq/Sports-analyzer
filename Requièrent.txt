@@ -1,0 +1,5 @@
+streaming
+requests
+numpy
+scipy
+pandas
