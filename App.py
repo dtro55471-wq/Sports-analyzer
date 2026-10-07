@@ -4,184 +4,176 @@ import scipy.stats as stats
 import streamlit as st
 
 st.set_page_config(
-    page_title="Analyseur Sportif Pro", page_icon="⚽", layout="centered"
+    page_title="Analyseur Pro par Cotes & xG", page_icon="⚽", layout="centered"
 )
 
-st.title("⚽ Analyseur Sportif Pro & Avancé")
+st.title("⚽ Analyseur Sportif Pro (Par Noms & Cotes)")
 st.markdown(
-    "Sélectionnez un championnat et un match pour l'analyser instantanément."
+    "Entrez les noms des clubs et les cotes du bookmaker pour obtenir une"
+    " analyse mathématique de haute précision (Modèle Poisson & Détection de"
+    " Value Bets)."
 )
 
-leagues = {
-    "🏆 Match Personnalisé (Saisie Libre)": {
-        "Saisir les équipes et xG": {
-            "home": "Domicile",
-            "away": "Extérieur",
-            "h_xg": 1.6,
-            "a_xg": 1.3,
-            "h_c": 5.5,
-            "a_c": 4.5,
-        }
-    },
-    "🇪🇺 UEFA Champions League": {
-        "Real Madrid vs Manchester City": {
-            "home": "Real Madrid",
-            "away": "Manchester City",
-            "h_xg": 1.85,
-            "a_xg": 1.75,
-            "h_c": 5.5,
-            "a_c": 5.0,
-        },
-        "Bayern Munich vs Paris Saint-Germain": {
-            "home": "Bayern Munich",
-            "away": "Paris Saint-Germain",
-            "h_xg": 1.95,
-            "a_xg": 1.6,
-            "h_c": 6.0,
-            "a_c": 4.5,
-        },
-        "Barcelone vs Inter Milan": {
-            "home": "Barcelone",
-            "away": "Inter Milan",
-            "h_xg": 1.70,
-            "a_xg": 1.40,
-            "h_c": 5.5,
-            "a_c": 4.0,
-        },
-    },
-    "🇬🇧 Premier League": {
-        "Arsenal vs Liverpool": {
-            "home": "Arsenal",
-            "away": "Liverpool",
-            "h_xg": 1.75,
-            "a_xg": 1.65,
-            "h_c": 6.0,
-            "a_c": 5.5,
-        },
-        "Manchester City vs Chelsea": {
-            "home": "Manchester City",
-            "away": "Chelsea",
-            "h_xg": 2.1,
-            "a_xg": 1.3,
-            "h_c": 6.5,
-            "a_c": 4.0,
-        },
-        "Manchester United vs Tottenham": {
-            "home": "Manchester United",
-            "away": "Tottenham",
-            "h_xg": 1.60,
-            "a_xg": 1.55,
-            "h_c": 5.5,
-            "a_c": 5.0,
-        },
-    },
-    "🇪🇸 La Liga": {
-        "Real Madrid vs Barcelone": {
-            "home": "Real Madrid",
-            "away": "Barcelone",
-            "h_xg": 1.9,
-            "a_xg": 1.8,
-            "h_c": 6.0,
-            "a_c": 5.0,
-        },
-        "Atletico Madrid vs Real Sociedad": {
-            "home": "Atletico Madrid",
-            "away": "Real Sociedad",
-            "h_xg": 1.65,
-            "a_xg": 1.10,
-            "h_c": 5.0,
-            "a_c": 4.0,
-        },
-    },
-    "🇮🇹 Serie A": {
-        "Juventus vs AC Milan": {
-            "home": "Juventus",
-            "away": "AC Milan",
-            "h_xg": 1.45,
-            "a_xg": 1.35,
-            "h_c": 4.5,
-            "a_c": 4.5,
-        },
-        "Inter Milan vs Lazio": {
-            "home": "Inter Milan",
-            "away": "Lazio",
-            "h_xg": 1.90,
-            "a_xg": 1.30,
-            "h_c": 6.0,
-            "a_c": 4.2,
-        },
-    },
-    "🇩🇪 Bundesliga": {
-        "Borussia Dortmund vs RB Leipzig": {
-            "home": "Borussia Dortmund",
-            "away": "RB Leipzig",
-            "h_xg": 1.80,
-            "a_xg": 1.50,
-            "h_c": 6.0,
-            "a_c": 5.0,
-        },
-        "Bayern Munich vs Bayer Leverkusen": {
-            "home": "Bayern Munich",
-            "away": "Bayer Leverkusen",
-            "h_xg": 2.10,
-            "a_xg": 1.80,
-            "h_c": 6.5,
-            "a_c": 5.5,
-        },
-    },
-    "🇫🇷 Ligue 1": {
-        "Paris Saint-Germain vs Marseille": {
-            "home": "Paris Saint-Germain",
-            "away": "Marseille",
-            "h_xg": 2.10,
-            "a_xg": 1.20,
-            "h_c": 6.5,
-            "a_c": 4.0,
-        },
-        "AS Monaco vs Lyon": {
-            "home": "AS Monaco",
-            "away": "Lyon",
-            "h_xg": 1.75,
-            "a_xg": 1.55,
-            "h_c": 5.5,
-            "a_c": 5.0,
-        },
-    },
-    "🌍 Compétitions Africaines & Arabes": {
-        "Al Ahly vs Espérance de Tunis": {
-            "home": "Al Ahly",
-            "away": "Espérance de Tunis",
-            "h_xg": 1.60,
-            "a_xg": 1.15,
-            "h_c": 5.0,
-            "a_c": 4.0,
-        },
-        "Wydad AC vs Mamelodi Sundowns": {
-            "home": "Wydad AC",
-            "away": "Mamelodi Sundowns",
-            "h_xg": 1.50,
-            "a_xg": 1.30,
-            "h_c": 4.5,
-            "a_c": 4.5,
-        },
-        "Al Hilal vs Al Nassr": {
-            "home": "Al Hilal",
-            "away": "Al Nassr",
-            "h_xg": 2.00,
-            "a_xg": 1.90,
-            "h_c": 6.0,
-            "a_c": 5.8,
-        },
-    },
-}
+# شريط جانبى لإدخال أسماء الأندية والكوطات (Cotes)
+st.sidebar.header("⚙️ Saisie des Clubs & Cotes")
+home_team = st.sidebar.text_input("Équipe Domicile", "Real Madrid")
+away_team = st.sidebar.text_input("Équipe Extérieur", "Manchester City")
 
-st.sidebar.header("🌍 Navigation")
-sel_league = st.sidebar.selectbox("Championnat:", list(leagues.keys()))
-match_dict = leagues[sel_league]
-sel_match = st.sidebar.selectbox("Match:", list(match_dict.keys()))
+st.sidebar.markdown("---")
+st.sidebar.subheader("📊 Cotes du Bookmaker (1X2)")
+cote_home = st.sidebar.number_input(
+    f"Cote 1 ({home_team})", min_value=1.01, max_value=50.0, value=2.10, step=0.05
+)
+cote_draw = st.sidebar.number_input(
+    "Cote X (Nul)", min_value=1.01, max_value=50.0, value=3.40, step=0.05
+)
+cote_away = st.sidebar.number_input(
+    f"Cote 2 ({away_team})", min_value=1.01, max_value=50.0, value=3.20, step=0.05
+)
 
-info = match_dict[sel_match]
+st.sidebar.markdown("---")
+st.sidebar.subheader("🚩 Paramètres Avancés")
+avg_corners = st.sidebar.slider(
+    "Moyenne Estimée des Corners", min_value=6.0, max_value=14.0, value=9.5, step=0.5
+)
 
-if "cur" not in st.session_state or st.session_state.cur != sel_match:
-  st.session_state.cur = sel_match
-  st.session_state.h_team 
+# 1. حساب الاحتمالات الضمنية من الكوطات (Implied Probabilities & Margin Removal)
+imp_h = 1.0 / cote_home
+imp_d = 1.0 / cote_draw
+imp_a = 1.0 / cote_away
+total_margin = imp_h + imp_d + imp_a
+
+# الاحتمالات الحقيقية بعد إزالة هامش ربح الشركة (Fair Probabilities)
+fair_h = imp_h / total_margin
+fair_d = imp_d / total_margin
+fair_a = imp_a / total_margin
+
+# 2. استنتاج الأهداف المتوقعة (xG) بدقة عالية من الكوطات وتوزيع القوة
+total_expected_goals = 2.75
+h_xg = max(
+    0.5,
+    min(
+        4.0,
+        total_expected_goals
+        * (fair_h + 0.5 * fair_d)
+        / (fair_h + fair_d + fair_a),
+    )
+)
+a_xg = max(
+    0.5,
+    min(
+        4.0,
+        total_expected_goals
+        * (fair_a + 0.5 * fair_d)
+        / (fair_h + fair_d + fair_a),
+    )
+)
+
+# 3. محاكاة بواسون الرياضية المتقدمة
+max_g = 6
+h_probs = [stats.poisson.pmf(i, h_xg) for i in range(max_g)]
+a_probs = [stats.poisson.pmf(j, away_xg) for j in range(max_g)]
+mat = np.outer(h_probs, a_probs)
+
+model_hw = float(np.sum(np.tril(mat, -1)))
+model_dr = float(np.sum(np.diag(mat)))
+model_aw = float(np.sum(np.triu(mat, 1)))
+
+u25 = float(
+    sum(mat[i, j] for i in range(max_g) for j in range(max_g) if i + j <= 2)
+)
+o25 = 1.0 - u25
+
+btts_y = float(
+    sum(mat[i, j] for i in range(1, max_g) for j in range(1, max_g))
+)
+btts_n = 1.0 - btts_y
+
+cs_h = float(a_probs[0])
+cs_a = float(h_probs[0])
+
+# العرض الرئيسي في الواجهة
+st.subheader(
+    f"📈 Analyse Statistique de Haute Précision : {home_team} vs {away_team}"
+)
+
+col1, col2, col3 = st.columns(3)
+col1.metric(
+    f"Modèle {home_team}",
+    f"{model_hw * 100:.1f}%",
+    delta=f"Cote: {cote_home}",
+)
+col2.metric("Modèle Nul (X)", f"{model_dr * 100:.1f}%", delta=f"Cote: {cote_draw}")
+col3.metric(
+    f"Modèle {away_team}",
+    f"{model_aw * 100:.1f}%",
+    delta=f"Cote: {cote_away}",
+)
+
+st.markdown("---")
+
+# 4. نظام كشف القيم الرابحة (Value Bets Detection Engine)
+st.subheader("💡 Détection des Value Bets (Analyse de Rentabilité)")
+st.markdown(
+    "Comparaison intelligente entre le modèle mathématique et les cotes du"
+    " bookmaker :"
+)
+
+
+def check_value(model_prob, cote):
+  implied = 1.0 / cote
+  edge = (model_prob - implied) * 100
+  if edge > 3.0:
+    return (
+        f"🔥 Value Bet Fort! (Edge: +{edge:.1f}%) - Opportunité Hautement"
+        " Rentable"
+    )
+  elif edge > 0:
+    return f"👍 Légère Valeur (Edge: +{edge:.1f}%)"
+  else:
+    return f"⚠️ Pas de Valeur (Edge: {edge:.1f}% - À Éviter)"
+
+
+vb1 = check_value(model_hw, cote_home)
+vb2 = check_value(model_dr, cote_draw)
+vb3 = check_value(model_aw, cote_away)
+
+st.info(
+    f"**1️⃣ Victoire {home_team} :** {vb1}\n\n"
+    f"**🟰 Match Nul (X) :** {vb2}\n\n"
+    f"**2️⃣ Victoire {away_team} :** {vb3}"
+)
+
+st.markdown("---")
+
+# 5. الأسواق المتقدمة (أهداف، شباك نظيفة، ركنيات)
+m_col1, m_col2 = st.columns(2)
+with m_col1:
+  st.markdown("### 🥅 Marché des Buts & xG")
+  st.write(f"xG Estimé ({home_team}) : **{h_xg:.2f} buts**")
+  st.write(f"xG Estimé ({away_team}) : **{a_xg:.2f} buts**")
+  st.write(f"Plus de 2.5 buts (Over 2.5) : **{o25 * 100:.1f}%**")
+  st.write(f"Moins de 2.5 buts (Under 2.5) : **{u25 * 100:.1f}%**")
+  st.write(f"Les deux équipes marquent (BTTS Oui) : **{btts_y * 100:.1f}%**")
+
+with m_col2:
+  st.markdown("### 🛡️ Défense & Corners")
+  st.write(
+      f"Clean Sheet {home_team} (Sans encaisser) :"
+      f" **{cs_h * 100:.1f}%**"
+  )
+  st.write(
+      f"Clean Sheet {away_team} (Sans encaisser) :"
+      f" **{cs_a * 100:.1f}%**"
+  )
+  st.write(f"Moyenne Estimée des Corners : **{avg_corners}** corners")
+
+st.markdown("---")
+
+# 6. مصفوفة النتائج الدقيقة
+st.subheader("🎯 Matrice des Scores Exacts (Top 6)")
+scores = []
+for h in range(4):
+  for a in range(4):
+    scores.append(
+  
