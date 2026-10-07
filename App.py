@@ -159,4 +159,14 @@ with market_col1:
 
 with market_col2:
   st.markdown("### ⚽ Les deux équipes marquent (GG / NG)")
-  st.write(f"Les deux équipes marquent (Oui) : **{btts
+  st.write(f"Les deux équipes marquent (Oui) : **{btts_yes * 100:.1f}%**")
+  st.write(f"Non / Un seul marque (Non) : **{btts_no * 100:.1f}%**")
+
+st.markdown("---")
+st.subheader("🚩 Analyse des Corners")
+total_corners = home_corners + away_corners
+st.info(
+    "Moyenne totale estimée des corners :"
+    f" **{total_corners:.1f}** corners dans le match"
+    f" ({home_team}: {home_corners} | {away_team}: {away_corners})"
+)
