@@ -194,4 +194,4 @@ max_goals = 7
 home_probs = [stats.poisson.pmf(i, home_xg) for i in range(max_goals)]
 away_probs = [stats.poisson.pmf(j, away_xg) for j in range(max_goals)]
 
-matrix = np.outer)
+matrix = np.outer(
