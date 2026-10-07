@@ -48,14 +48,6 @@ leagues = {
             "h_c": 5.5,
             "a_c": 4.0,
         },
-        "Arsenal vs Real Madrid": {
-            "home": "Arsenal",
-            "away": "Real Madrid",
-            "h_xg": 1.65,
-            "a_xg": 1.70,
-            "h_c": 5.8,
-            "a_c": 5.2,
-        },
     },
     "🇬🇧 Premier League": {
         "Arsenal vs Liverpool": {
@@ -82,22 +74,6 @@ leagues = {
             "h_c": 5.5,
             "a_c": 5.0,
         },
-        "Aston Villa vs Newcastle United": {
-            "home": "Aston Villa",
-            "away": "Newcastle United",
-            "h_xg": 1.55,
-            "a_xg": 1.45,
-            "h_c": 5.0,
-            "a_c": 4.8,
-        },
-        "Brighton vs West Ham": {
-            "home": "Brighton",
-            "away": "West Ham",
-            "h_xg": 1.65,
-            "a_xg": 1.35,
-            "h_c": 6.0,
-            "a_c": 4.2,
-        },
     },
     "🇪🇸 La Liga": {
         "Real Madrid vs Barcelone": {
@@ -116,22 +92,6 @@ leagues = {
             "h_c": 5.0,
             "a_c": 4.0,
         },
-        "Athletic Bilbao vs Villarreal": {
-            "home": "Athletic Bilbao",
-            "away": "Villarreal",
-            "h_xg": 1.60,
-            "a_xg": 1.30,
-            "h_c": 5.5,
-            "a_c": 4.5,
-        },
-        "Real Betis vs Valencia": {
-            "home": "Real Betis",
-            "away": "Valencia",
-            "h_xg": 1.50,
-            "a_xg": 1.20,
-            "h_c": 4.8,
-            "a_c": 4.2,
-        },
     },
     "🇮🇹 Serie A": {
         "Juventus vs AC Milan": {
@@ -142,14 +102,6 @@ leagues = {
             "h_c": 4.5,
             "a_c": 4.5,
         },
-        "Napoli vs AS Roma": {
-            "home": "Napoli",
-            "away": "AS Roma",
-            "h_xg": 1.75,
-            "a_xg": 1.20,
-            "h_c": 5.5,
-            "a_c": 4.0,
-        },
         "Inter Milan vs Lazio": {
             "home": "Inter Milan",
             "away": "Lazio",
@@ -157,14 +109,6 @@ leagues = {
             "a_xg": 1.30,
             "h_c": 6.0,
             "a_c": 4.2,
-        },
-        "Atalanta vs Fiorentina": {
-            "home": "Atalanta",
-            "away": "Fiorentina",
-            "h_xg": 1.80,
-            "a_xg": 1.40,
-            "h_c": 5.8,
-            "a_c": 4.6,
         },
     },
     "🇩🇪 Bundesliga": {
@@ -184,5 +128,60 @@ leagues = {
             "h_c": 6.5,
             "a_c": 5.5,
         },
-        "VfB Stuttgart vs Eintracht Frankfurt": {
-  
+    },
+    "🇫🇷 Ligue 1": {
+        "Paris Saint-Germain vs Marseille": {
+            "home": "Paris Saint-Germain",
+            "away": "Marseille",
+            "h_xg": 2.10,
+            "a_xg": 1.20,
+            "h_c": 6.5,
+            "a_c": 4.0,
+        },
+        "AS Monaco vs Lyon": {
+            "home": "AS Monaco",
+            "away": "Lyon",
+            "h_xg": 1.75,
+            "a_xg": 1.55,
+            "h_c": 5.5,
+            "a_c": 5.0,
+        },
+    },
+    "🌍 Compétitions Africaines & Arabes": {
+        "Al Ahly vs Espérance de Tunis": {
+            "home": "Al Ahly",
+            "away": "Espérance de Tunis",
+            "h_xg": 1.60,
+            "a_xg": 1.15,
+            "h_c": 5.0,
+            "a_c": 4.0,
+        },
+        "Wydad AC vs Mamelodi Sundowns": {
+            "home": "Wydad AC",
+            "away": "Mamelodi Sundowns",
+            "h_xg": 1.50,
+            "a_xg": 1.30,
+            "h_c": 4.5,
+            "a_c": 4.5,
+        },
+        "Al Hilal vs Al Nassr": {
+            "home": "Al Hilal",
+            "away": "Al Nassr",
+            "h_xg": 2.00,
+            "a_xg": 1.90,
+            "h_c": 6.0,
+            "a_c": 5.8,
+        },
+    },
+}
+
+st.sidebar.header("🌍 Navigation")
+sel_league = st.sidebar.selectbox("Championnat:", list(leagues.keys()))
+match_dict = leagues[sel_league]
+sel_match = st.sidebar.selectbox("Match:", list(match_dict.keys()))
+
+info = match_dict[sel_match]
+
+if "cur" not in st.session_state or st.session_state.cur != sel_match:
+  st.session_state.cur = sel_match
+  st.session_state.h_team 
