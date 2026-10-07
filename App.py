@@ -4,18 +4,28 @@ import scipy.stats as stats
 import streamlit as st
 
 st.set_page_config(
-    page_title="Analyseur Sportif Global", page_icon="⚽", layout="centered"
+    page_title="Analyseur Sportif Pro", page_icon="⚽", layout="centered"
 )
 
-st.title("⚽ Analyseur Sportif Global par Championnat")
+st.title("⚽ Analyseur Sportif Professionnel & Avancé")
 st.markdown(
-    "Sélectionnez d'abord le championnat, puis le match pour l'analyser"
-    " instantanément."
+    "Analysez n'importe quel match dans le monde avec des statistiques"
+    " approfondies (xG, Corners, Scores Exacts et Clean Sheets)."
 )
 
-# هيكل البطولات والدوريات الكبرى
+# قائمة واسعة وشاملة لأبرز الدوريات العالمية مع إمكانية التعديل الكامل
 leagues = {
-    "UEFA Champions League": {
+    "🏆 Match Personnalisé / En Direct (Saisie Libre)": {
+        "Saisir les équipes et xG du match du jour": {
+            "home": "Équipe Domicile",
+            "away": "Équipe Extérieur",
+            "h_xg": 1.60,
+            "a_xg": 1.30,
+            "h_c": 5.5,
+            "a_c": 4.5,
+        }
+    },
+    "🇪🇺 UEFA Champions League": {
         "Real Madrid vs Manchester City": {
             "home": "Real Madrid",
             "away": "Manchester City",
@@ -41,7 +51,7 @@ leagues = {
             "a_c": 4.0,
         },
     },
-    "Premier League (Angleterre)": {
+    "🇬🇧 Premier League (Angleterre)": {
         "Arsenal vs Liverpool": {
             "home": "Arsenal",
             "away": "Liverpool",
@@ -50,24 +60,24 @@ leagues = {
             "h_c": 6.0,
             "a_c": 5.5,
         },
-        "Manchester United vs Chelsea": {
-            "home": "Manchester United",
+        "Manchester City vs Chelsea": {
+            "home": "Manchester City",
             "away": "Chelsea",
-            "h_xg": 1.55,
-            "a_xg": 1.50,
-            "h_c": 5.0,
-            "a_c": 5.0,
+            "h_xg": 2.10,
+            "a_xg": 1.30,
+            "h_c": 6.5,
+            "a_c": 4.0,
         },
-        "Tottenham vs Newcastle United": {
-            "home": "Tottenham",
-            "away": "Newcastle United",
+        "Manchester United vs Tottenham": {
+            "home": "Manchester United",
+            "away": "Tottenham",
             "h_xg": 1.60,
             "a_xg": 1.55,
-            "h_c": 6.5,
+            "h_c": 5.5,
             "a_c": 5.0,
         },
     },
-    "La Liga (Espagne)": {
+    "🇪🇸 La Liga (Espagne)": {
         "Real Madrid vs Barcelone": {
             "home": "Real Madrid",
             "away": "Barcelone",
@@ -76,44 +86,16 @@ leagues = {
             "h_c": 6.0,
             "a_c": 5.0,
         },
-        "Atletico Madrid vs Athletic Bilbao": {
+        "Atletico Madrid vs Real Sociedad": {
             "home": "Atletico Madrid",
-            "away": "Athletic Bilbao",
+            "away": "Real Sociedad",
             "h_xg": 1.65,
             "a_xg": 1.10,
             "h_c": 5.0,
             "a_c": 4.0,
         },
     },
-    "Serie A (Italie)": {
-        "Juventus vs AC Milan": {
-            "home": "Juventus",
-            "away": "AC Milan",
-            "h_xg": 1.45,
-            "a_xg": 1.35,
-            "h_c": 4.5,
-            "a_c": 4.5,
-        },
-        "Napoli vs AS Roma": {
-            "home": "Napoli",
-            "away": "AS Roma",
-            "h_xg": 1.75,
-            "a_xg": 1.20,
-            "h_c": 5.5,
-            "a_c": 4.0,
-        },
-    },
-    "Bundesliga (Allemagne)": {
-        "Borussia Dortmund vs RB Leipzig": {
-            "home": "Borussia Dortmund",
-            "away": "RB Leipzig",
-            "h_xg": 1.80,
-            "a_xg": 1.50,
-            "h_c": 6.0,
-            "a_c": 5.0,
-        },
-    },
-    "Ligue des Champions de la CAF": {
+    "🌍 Compétitions Africaines & Arabes": {
         "Al Ahly vs Espérance de Tunis": {
             "home": "Al Ahly",
             "away": "Espérance de Tunis",
@@ -130,27 +112,25 @@ leagues = {
             "h_c": 4.5,
             "a_c": 4.5,
         },
-    },
-    "🛠️ Personnalisé (Saisie manuelle)": {
-        "Match personnalisé": {
-            "home": "Domicile",
-            "away": "Extérieur",
-            "h_xg": 1.50,
-            "a_xg": 1.20,
+        "Raja CA vs FAR Rabat": {
+            "home": "Raja CA",
+            "away": "FAR Rabat",
+            "h_xg": 1.55,
+            "a_xg": 1.35,
             "h_c": 5.0,
-            "a_c": 4.0,
-        }
+            "a_c": 4.5,
+        },
     },
 }
 
-st.sidebar.header("🌍 Navigation par Championnat")
+st.sidebar.header("🌍 Sélection de la Compétition")
 selected_league = st.sidebar.selectbox(
-    "Sélectionnez un championnat :", list(leagues.keys())
+    "Choisissez le championnat :", list(leagues.keys())
 )
 
 match_dict = leagues[selected_league]
 selected_match = st.sidebar.selectbox(
-    "Sélectionnez un match :", list(match_dict.keys())
+    "Choisissez le match :", list(match_dict.keys())
 )
 
 match_info = match_dict[selected_match]
@@ -169,14 +149,34 @@ if (
 
 st.divider()
 
+st.subheader("⚙️ Paramètres & Statistiques du Match")
 col1, col2 = st.columns(2)
 with col1:
-  home_team = st.text_input("Équipe à domicile", key="home_team")
+  home_team = st.text_input("Équipe à Domicile", key="home_team")
   home_xg = st.number_input(
-      "xG Domicile", min_value=0.1, max_value=5.0, step=0.05, key="home_xg"
+      "xG Domicile (Buts attendus)",
+      min_value=0.1,
+      max_value=6.0,
+      step=0.05,
+      key="home_xg",
   )
 with col2:
-  away_team = st.text_input("Équipe à l'extérieur", key="away_team")
+  away_team = st.text_input("Équipe à l'Extérieur", key="away_team")
   away_xg = st.number_input(
-      "xG Extérieur", min_value=0.1, max_value=5.0, step=0.05, key="away_xg"
+      "xG Extérieur (Buts attendus)",
+      min_value=0.1,
+      max_value=6.0,
+      step=0.05,
+      key="away_xg",
   )
+
+st.subheader("🚩 Analyse des Corners")
+col_c1, col_c2 = st.columns(2)
+with col_c1:
+  home_corners = st.number_input(
+      "Corners Domicile",
+      min_value=0.5,
+      max_value=15.0,
+      step=0.5,
+      key="home_corners",
+ 
