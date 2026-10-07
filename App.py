@@ -13,7 +13,7 @@ st.markdown(
     " instantanément."
 )
 
-# هيكل هرمي يضم الدوريات والبطولات الكبرى مع مبارياتها
+# هيكل البطولات والدوريات الكبرى
 leagues = {
     "UEFA Champions League": {
         "Real Madrid vs Manchester City": {
@@ -148,7 +148,6 @@ selected_league = st.sidebar.selectbox(
     "Sélectionnez un championnat :", list(leagues.keys())
 )
 
-# اختيار المباريات التابع للدوري المحدد
 match_dict = leagues[selected_league]
 selected_match = st.sidebar.selectbox(
     "Sélectionnez un match :", list(match_dict.keys())
@@ -179,4 +178,5 @@ with col1:
 with col2:
   away_team = st.text_input("Équipe à l'extérieur", key="away_team")
   away_xg = st.number_input(
-      "xG Extérieur
+      "xG Extérieur", min_value=0.1, max_value=5.0, step=0.05, key="away_xg"
+  )
